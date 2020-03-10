@@ -1,0 +1,342 @@
+import java.text.DateFormate;
+import java.text.SimpleDateFormat;
+import java util.Date;
+import java.util.TimeZone;
+import java.math.*
+
+
+def testcasename= testRunner.testCase.name
+def callingTC testRunner.getTestCase();
+
+
+def myownStatus="";
+def colour="";
+
+def FinalStatus=0;
+def FinalColour="";
+
+def testcaseStatus= "";
+log.info testcaseStatus
+
+Date date= new Date();
+//Log the testCase name, status and all the test Step messages
+testCaseName = testRunner.testCase.name
+log.info testCaseName
+
+//find the time taken
+
+def groovyUtils= new com.eviware.soapui.support.GroovyUtils(context)
+
+double currtime= testRunner.timeTaken;
+double time =0.00;
+prevTime = 0.00;
+
+if (context.testcasesTimeTaken != null && context.testcaseStatus.size() > 0 && context.inputindex !=0)
+{
+time = currtime - context.prevTime;
+log.info "time"+time;
+}else {
+	time= currtime;
+	log.info "not runned time"+time;
+}
+double seconds= (time/1000);
+try{
+	seconds= seconds.round(2);
+	log.info "second" +second;
+	
+}catch(e){
+	log.info "error: "e
+}
+
+def Directory = new Date().format("yyyy-MM-dd");
+log.info "directory" + Directory
+def results = testRunner.results
+
+//create directory
+def resultDir = new File(groovyUtils.projectPath+"\\Reports\\API_$Directory");
+if(!resultDir.exists()){
+	resultDir.mkdirs();
+}
+//get the total testcase count
+def TestCaseCount = testRunner.testCase.getTestStepCount();
+def TotlaCount = new String[TestStepCount];
+def TimeStamp = new java.text.SimpleDateFormat("ddHHmmss").format(new Date())
+//folder creation path
+try{
+	//log.info resultDir
+	def fileName= testRunner.testCase.name+(TimeStamp)+(".html")
+	File Report= new  File (groovyUtils.projectPath+"\\Reports\\API_$Directory\\$fileName");
+	log.info fileName;
+
+	def myfilePath = Report.toString()
+	//set filename in every test Suite
+	testRunner.testCase.setPropertyValue("DetailedReportName", fileName)
+	//captureing todays date
+	Date today= new Date();
+	//displaying the this date on IST time zone
+	DateFormat df= new SimpleDateFormat("dd-MM-yy HH:mm:SS z");
+
+	df.setTimeZone(TimeZone.getTimeZone("Asia/Kolkata"));
+	def String IST= df.format(today);
+	log.info("Date in Indian Timezone(IST):"+IST);
+	
+	//displaying date on PST timezone
+	
+	df.setTimeZone(TimeZone.getTimeZone("EST"));
+	def String EST= df.format(today);
+	log.info("Date in EST Timezone:"+EST);
+
+	//going to write
+	PrintWriter Pen = new PrintWriter(Report);
+	Writer writer = new Writer(Report);
+	Pen.write("<html>")
+
+     Pen.write("<head>")
+
+     Pen.write("<TABLE align=center border=0 cellSpancing =1 cellPadding=1 width='70%'>")
+     Pen.write("<tr>")
+     Pen.write("<img src='https://hexaware.com/wp-content/themes/Hexaware/assets/img/logo-colored.svg' alt='Hex' hight='100' width='100' align='left'>")
+    // Pen.write("<img src='https://hexaware.com/wp-content/themes/Hexaware/assets/img/logo-colored.svg' alt='Hex' hight='100' width='150' align='right'>")
+     Pen.write("</tr>")
+     Pen.write("<tr>")
+     Pen.write("<td align= 'center'><H4 align='center'><font color='660066' face='arial' color='#7D5515' size=4><b>Execution Detailed Report</b></H4></td>")
+     Pen.write("</tr>")
+      Pen.write("</TABLE>")
+      log.info "header created"
+      //for creating testcase name and headers
+      Pen.write("<TABLE align=center border=1  width=50%>")
+      Pen.write("<tr>")
+      Pen.write("<TH bgColor=#7D5515 align=Center> <FONT color=#e0e0e0 size=2 face=Arial><a name=1></a><B>Project Name</b></th>")
+      Pen.write("<TH colspan=3 align=Center><FONT color= black size=3 stile= Arial><B>$testRunner.testCase.testSuite.project.name</B></TH>")
+      Pen.write("</tr>")
+      
+       Pen.write("<tr>")
+      Pen.write("<TH bgColor=#7D5515 align=Center> <FONT color=#e0e0e0 size=2 face=Arial><a name=1></a><B>Interface Name</b></th>")
+      Pen.write("<TH colspan=3 align=Center><FONT color= black size=3 stile= Arial><B>$testRunner.testCase.testSuite.name</B></TH>")
+      Pen.write("</tr>")
+
+      Pen.write("<tr>")
+      Pen.write("<TH bgColor=#7D5515 align=Center> <FONT color=#e0e0e0 size=2 face=Arial><B>TestCase Name</b></th>")
+      Pen.write("<TH colspan=3 align=Center><FONT color= black size=3 stile= Arial><B>$testRunner.testCase.name</B></TH>")
+      Pen.write("</tr>")
+      
+      Pen.write("<tr>")
+      Pen.write("<TH bgColor=#7D5515 align=Center> <FONT color=#e0e0e0 size=2 face=Arial><a name=1></a><B>Excecuted on</b></th>")
+      Pen.write("<TD align= 'center'><H4 align='center'><font color='660066' face='arial' color='#7D5515' size=3><b>$IST</b></H4></TD>")
+      Pen.write("<TD align= 'center'><H4 align='center'><font color='660066' face='arial' color='#7D5515' size=3><b>$EST</b></H4></TD>")
+      Pen.write("</tr>")
+
+ /* Pen.write("<tr>")
+      Pen.write("<TH bgColor=#153E7E align=middle width=10%> <FONT color=#e0e0e0 size=2 face=Arial><B>Status</b></th>")
+      Pen.write("<TH bgColor=#153E7E align=middle width=10%> <FONT size=2 face=Arial><B>Pending</b></th>")
+    
+      Pen.write("</tr>")
+     */ 
+
+     Pen.write("<p></p></TABLE><br>")
+
+     //begin main table
+
+     Pen.write("<TABLE align=center border=1 cellSpancing =1 cellPadding=1 width=90% font=Arial>")
+     Pen.write("<tr>")
+     Pen.write("<TH bgColor=#153e7e align=Middle> <FONT color=#e0e0e0 size=2 face=Arial><B>Step Name</b></th>")
+     Pen.write("<TH bgColor=#153e7e align=Middle> <FONT color=#e0e0e0 size=2 face=Arial><B>Request</b></th>")
+	Pen.write("<TH bgColor=#153e7e align=Middle> <FONT color=#e0e0e0 size=2 face=Arial><B>Response </b></th>")
+     Pen.write("<TH bgColor=#153e7e align=Middle> <FONT color=#e0e0e0 size=2 face=Arial><B>Status </b></th>")
+     Pen.write("<TH bgColor=#153e7e align=Middle> <FONT color=#e0e0e0 size=2 face=Arial><B>Error Codes</b></th>")
+     Pen.write("<TH bgColor=#153e7e align=Middle> <FONT color=#e0e0e0 size=2 face=Arial><B>Assertions </b></th>")
+    //  Pen.write("<TH bgColor=#153e7e align=Middle> <FONT color=#e0e0e0 size=2 face=Arial><B>Time Taken </b></th>")	
+     Pen.write("</tr>")
+    //  Pen.write("<TH bgColor=#153e7e align=Middle width=10%> <FONT color=#e0e0e0 size=2 face=Arial><B>Time Taken </b></th>")	
+    //Pen.write("hello world");
+
+	 for(r in testRunner.results){
+	 	if(r.getTestStep().config.type=="request"||r.getTestStep().config.type=="restrequest"||r.getTestStep().config.type=="restrequest"||r.getTestStep().config.type=="groovy"||r.testStep().name.toString().contains("Verify"))
+		{
+			//one table
+			 Pen.write("<tr>")
+			 Pen.write("<td align=left><font color=$153e7e size=2 style=Arial>")
+			 Pen.write(r.testStep.name)
+			 Pen.write("<td>")
+
+		//stepname
+		log.info r.teststep.name;
+
+						//def ResponseHeaders = messageExchange.responseHeaders
+						def testStep = r.gettestStep();
+
+
+						if(r.status.toString()=="OK")
+						{
+							//r.status.add("PASSED")
+
+							log.info r.status.toString();
+							myownStatus="PASSED"
+							colour="Green";
+							//FinalStatus = FinalStatus-1
+						}
+						else{
+							//testStepStatus.add("FAILED")
+							log.info r.status.toString();
+							myownStatus=r.status.tostrimg();
+							colour=""Red;
+							FinalStatus = FinalStatus+1
+						}
+						/*else{
+							myownStatus="NO Run";
+						}
+						*/
+
+						//////////misssing///////////
+						//fortaking the rest and jdbc steps raw data request
+						if(testStep.config.type=="request"||tetsStep.config.type=="restrequest"){
+							try{
+								def rawRequest = new String (r.rawRequestData);
+								def rawResponse = new String (r.rawResponseData);
+
+								//log.info rawRequest;
+								//log.info rawResponse;
+								//log.info seconds;
+
+								//def testStep = r.getTestStep();
+				//Write raw contents
+				//2nd Td
+			 Pen.write("<td>")
+			 Pen.write("<textarea rows='20' cols='40' style='border:none;'>"+ rawRequest +"</textarea>")
+			 Pen.write("</td>"
+
+			 //3rd td
+			 Pen.write("<td>")
+			 Pen.write("<textarea rows='20' cols='40' style='border:none;'>"+ rawResponse +"</textarea>")
+			 Pen.write("</td>"
+
+			 //4th td
+			 Pen.write("<td width='10%' bgcolor=$colour align=center><font color=white size=1 style=Arial>")
+			 Pen.write("$time")
+			 Pen.write("</td>"	
+
+			 def myTsName = r.testStep.name
+			 log.info "mytc"+myTsName
+
+		def groovyUtils = new com.eviware.soapui.Groovyutils(context)
+		def httpResponseHeaders	 =context.testCase.testSteps["$myTsNmae"].testRequest.response.responseHeaders
+
+		def httpStatus = httpResponseHeaders["#status#"]
+		testRunner.testCase.setPropertyValue("httpStatus", "$httpStatus")
+		def httpStatusCode = (httpStatus =~"[1-5]\\d\\d")[0]
+
+		if(httpStatusCode=='200'||httpStatus=='201'){
+			log.info "valid status code";
+
+			//testRunner.testCase.testSuite.setPropertyValue("ErrorCode","")
+		}
+		else{
+			log.info("HTTP status code:"+httpStatusCode)
+			log.info "mystatusCode"+httpStatus
+
+			log.info "'issue begin"
+			//myTsName
+			testRunner.testCase.tetsSuite.setPropertyValue("ErrorCode", "$httpStatus")
+			testRunner.testCase.tetsSuite.setPropertyValue("httpStatus", "$httpStatus")
+			
+		}
+		//Pen.write("<td width='10%' align=center><fontcolor=white size=1 style=Arial>")
+		//Pen.writw("$seconds")
+		//Pen.writw(""</td>)
+
+		}catch(e){
+			log.info "error: "+e;
+			//log issue
+			 Pen.write("<td align=left><font color=red size=2 style=Arial>")
+			////////// Pen.write("<textarea rows='20' cols='40' style='border:none;'>"Connection to"""" url"""</textarea>")
+			 Pen.write("</td>"
+
+			  Pen.write("<td align=left><font color=red size=2 style=Arial>")
+			  Pen.write("<textarea rows='20' cols='40' style='border:none;'>$e</textarea>")
+			  Pen.write("</td>"
+			  
+			  Pen.write("<td width='10%' bgcolor=$colour align=center><font color=white size=1 style=Arial>")
+			  Pen.write("$myownStatus")
+			  Pen.write("</td>"
+
+			  testRunner.testCase.testSuite.setPropertyValue("ErrorCode", "Timeout")
+			
+		}
+		//for taking the groovy
+		
+						}else if(testStep.config.type=="grovvy"){
+							try{
+								if(r.testStep.name.toString().contains("Calling")){
+									//myTsname
+									GReq = "reading log based on the Correlation ID";
+									//log.info GReq
+									GRes = testRunner.testCase.getPropertyValue("TextMessage")
+									log.info "response"+GRes
+									Pen.write("<td align=left><font color=$153e7e size=2 style=Arial>")
+									Pen.write("&GRes")
+									Pen.write("<\td>")
+
+									Pen.write("<td width='10%' bgcolor=$color align=center><font color=white size=1 style=Arial>")
+									Pen.write("&myownStatus")
+									Pen.write("<\td>")
+									
+									Pen.write("<td width='10%' align=center><font color=white size=1 style=Arial>")
+									Pen.write()
+									Pen.write("<\td>")
+
+									Pen.write("<td>")
+									Pen.write()
+									Pen.write("<\td>")
+									
+								}else{
+									def GReq="";
+									//log.info Greq
+
+									def GRes="";
+									//log.info GRes
+									Pen.write("<td align=left><font color=$153e7e size=2 style=Arial>")
+									Pen.write("$GReq")
+									Pen.write("<\td>")
+
+									Pen.write("<td align=left><font color=$153e7e size=2 style=Arial>")
+									Pen.write("$GRes")
+									Pen.write("<\td>")
+
+									
+									Pen.write("<td width='10%' bgcolor=$colour align=center><font color=white size=1 style=Arial>")
+									Pen.write("$myownStatus")
+			  						Pen.write("</td>"
+
+			  						Pen.write("<td width='10%' align=center><font color=white size=1 style=Arial>")
+									Pen.write()
+									Pen.write("<\td>")
+
+									Pen.write("<td>")
+									Pen.write()
+									Pen.write("<\td>")
+
+									//Eai Begin
+
+									//def rawRequest = new String (r.rawRequestData);  //the raw Requesr taht is send to the endpoint
+									//def rawResponse = new String (r.rawResponseData);  //the raw response that is received from the 
+
+									//log.info rawRequest;
+									//log.info rawResponse
+
+									//Eai Ended
+
+									//def rawRequest = new String (r.rawRequestData);  //the raw Requesr taht is send to the endpoint
+									//def rawResponse = new String (r.rawResponseData);  //the raw response that is received from the 									
+
+									//log.info rawRequest;
+									
+								}
+							}
+							
+						}
+			
+			}	 	
+		}
+	 }
+	 
+     
